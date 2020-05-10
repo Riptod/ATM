@@ -1,12 +1,12 @@
 package com.example.atm.service;
 
-import com.example.atm.entity.ATM;
+import com.example.atm.entity.Atm;
 import com.example.atm.entity.Dollar;
 
-public interface ATMService {
-    ATM save(ATM atm);
+public interface AtmService {
+    Atm save(Atm atm);
 
-    ATM findById(Long id);
+    Atm findById(Long id);
 
     void addCashToATM(Long atmId, Dollar dollar, Long value);
 

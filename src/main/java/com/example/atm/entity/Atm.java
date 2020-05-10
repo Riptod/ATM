@@ -17,7 +17,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class ATM {
+public class Atm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,7 +26,7 @@ public class ATM {
     @MapKeyEnumerated(EnumType.STRING)
     private Map<Dollar, Long> cash = new HashMap<>();
 
-    public ATM() {
+    public Atm() {
         cash.put(Dollar.DOLLARS100, 0L);
         cash.put(Dollar.DOLLARS200, 0L);
         cash.put(Dollar.DOLLARS500, 0L);

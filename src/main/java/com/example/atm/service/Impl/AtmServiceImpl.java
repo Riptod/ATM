@@ -4,54 +4,54 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.example.atm.entity.ATM;
+import com.example.atm.entity.Atm;
 import com.example.atm.entity.BankAccount;
 import com.example.atm.entity.Dollar;
-import com.example.atm.exception.ATMException;
-import com.example.atm.repository.ATMRepository;
+import com.example.atm.exception.RequestCustomException;
+import com.example.atm.repository.AtmRepository;
 import com.example.atm.repository.BankAccountRepository;
-import com.example.atm.service.ATMService;
+import com.example.atm.service.AtmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ATMServiceImpl implements ATMService {
+public class AtmServiceImpl implements AtmService {
     @Autowired
-    private ATMRepository atmRepository;
+    private AtmRepository atmRepository;
     @Autowired
     private BankAccountRepository bankAccountRepository;
 
     @Override
-    public ATM save(ATM atm) {
+    public Atm save(Atm atm) {
         return atmRepository.save(atm);
     }
 
     @Override
-    public ATM findById(Long id) {
-        Optional<ATM> atm = atmRepository.findById(id);
-        if (atm.isEmpty()) {
-            throw new ATMException("Can`t find ATM by ID");
+    public Atm findById(Long id) {
+        Optional<Atm> atm = atmRepository.findById(id);
+        if (!atm.isPresent()) {
+            throw new RequestCustomException("Can`t find ATM by Id - " + id);
         }
         return atm.get();
     }
 
     @Override
     public void addCashToATM(Long atmId, Dollar dollar, Long value) {
-        ATM atm = findById(atmId);
+        Atm atm = findById(atmId);
         atm.addDollars(dollar, value);
         save(atm);
     }
 
     @Override
     public void getCashFromATM(Long atmId, Long accountNumber, Long value) {
-        ATM atm = findById(atmId);
+        Atm atm = findById(atmId);
         BankAccount bankAccount = bankAccountRepository.findByNumber(accountNumber);
         if (bankAccount.getCash() < value) {
-            throw new ATMException("Not enough money on you account");
+            throw new RequestCustomException("Not enough money on you account");
         } else if (getAtmCash(atm) < value) {
-            throw new ATMException("Not enough money in ATM");
+            throw new RequestCustomException("Not enough money in ATM");
         } else if (value % 100 != 0) {
-            throw new ATMException("Your amount is not a multiple of 100");
+            throw new RequestCustomException("Your amount is not a multiple of 100");
         }
         Map<Dollar, Long> resultCash = new HashMap<>();
         bankAccount.setCash(bankAccount.getCash() - value);
@@ -83,7 +83,7 @@ public class ATMServiceImpl implements ATMService {
         BankAccount youBankAccount = bankAccountRepository.findByNumber(numberOfYouAccount);
         BankAccount anotherBankAccount = bankAccountRepository.findByNumber(numberOfAnotherAccount);
         if (youBankAccount.getCash() < value) {
-            throw new  ATMException("Not enough money on you account");
+            throw new RequestCustomException("Not enough money on you account");
         }
         youBankAccount.setCash(youBankAccount.getCash() - value);
         anotherBankAccount.setCash(anotherBankAccount.getCash() + value);
@@ -91,7 +91,7 @@ public class ATMServiceImpl implements ATMService {
         bankAccountRepository.save(anotherBankAccount);
     }
 
-    private Long getAtmCash(ATM atm) {
+    private Long getAtmCash(Atm atm) {
         Long result = 0L;
         for (Map.Entry<Dollar, Long> entry : atm.getCash().entrySet()) {
             result += entry.getKey().getNominal() * entry.getValue();
